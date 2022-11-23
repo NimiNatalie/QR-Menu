@@ -1,0 +1,57 @@
+{% extends 'restaurant/main.html' %} 
+
+{% block content %} 
+
+{% include 'restaurant/status.html' %}
+
+<div class="row">
+
+  <div class="col">
+    <h5>TODAY'S ORDERS</h5>
+    <hr />
+    <div class="card">
+     
+      <table class="table">
+        <tr>
+          <th>CUSTOMER</th>
+          <th>Product</th>
+          <th>Date Ordered</th>
+          <th scope="col">Transaction ID</th>
+          <th>Status</th> 
+        <tr>
+          {% for order in page_obj %}
+          <td>{{ order.customer }}</td>
+            <td>
+              {% for orderitem in order.get_items %}
+              <li style="list-style-type:none;" >{{ orderitem.product.name}} </li>
+              {% endfor % %}
+            
+            </td>
+            
+            <td>{{ order.date_ordered}}</td>
+            <td>{{order.transaction_id}}</td>
+
+              {% if order.complete == True %}
+            <td><a class="btn btn-sm btn-info" href="">Paid</a></td>
+            {% else %}
+            <td><a class="btn btn-sm btn-danger" href="">Pending</a></td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  <div class="text-center container mt-5">
+    {% if page_obj.has_previous %}
+      <a class="poppins-font p-2" href="?page={{page_obj.previous_page_number}}">previous</a>
+    {% endif %}
+
+    <a class="p-2 active-btn poppins-font text-dark" style="background-color:lightgreen;">{{page_obj.number}}</a>
+    
+    {% if page_obj.has_next %}
+      <a class="p-2 poppins-font" href="?page={{ page_obj.next_page_number }}">next</a>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

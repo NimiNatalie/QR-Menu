@@ -1,0 +1,241 @@
+{% extends 'restaurant/main.html' %} {% load static %} {% block content %}
+<div class="container-fluid">
+  <div class="row no-gutter">
+    <div class="d-none d-md-flex col-md-4 col-lg-6 bg-image"></div>
+    <div class="col-md-8 col-lg-6">
+      <div class="login d-flex align-items-center py-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-9 col-lg-8 mx-auto">
+              <h3 class="login-heading mb-4">Register</h3>
+      <form id="form">
+        {% csrf_token %}
+        <div class="form-label-group">
+          <input
+            type="username"
+            name="username"
+            id="inputUsername"
+            class="form-control"
+            placeholder="Username"
+            required
+            autofocus
+          />
+          <label for="inputUsername">Username</label>
+        </div>
+        <div class="form-label-group">
+          <input
+            type="email"
+            name="email"
+            id="inputEmail"
+            class="form-control"
+            placeholder="email"
+            required
+            autofocus
+          />
+          <label for="inputEmail">E-mail</label>
+        </div>
+
+        <div class="form-label-group">
+          <input
+            type="password"
+            name="password"
+            id="inputPassword"
+            class="form-control"
+            placeholder="Password"
+            required
+          />
+          <label for="inputPassword">Password</label>
+        </div>
+
+        <input
+          id="form-button"
+          class="btn btn-lg btn-primary btn-block btn-login text-uppercase font-weight-bold mb-2"
+          type="submit"
+          value="Sign Up"
+        />
+        <div class="text-center">
+                  <a class="small" href="/register">Already have an account? Sign In</a>
+                </div>
+        <div
+          id="errors"
+          class="hidden box-element"
+          style="margin-top: 1em"
+        ></div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<script type="text/javascript">
+  var total = "{{ order.get_cart_total }}";
+  var form = document.getElementById("form");
+
+  if (user !== "AnonymousUser") {
+    document.getElementById("payment-info").classList.remove("hidden");
+    document.getElementById("form-div").remove(); //remove authentication form if already logged in.
+  } else {
+    //a guest user in incognito won't this cookie, so we generate it.
+    csrftoken = form.getElementsByTagName("input")[0].value;
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      sumbitFormData(e);
+    });
+  }
+
+  const getFormData = () => {
+    var userFormData = {
+      username: null,
+      email: null,
+      password: null,
+      total: total,
+    };
+
+    if (user == "AnonymousUser") {
+      userFormData.username = form.username.value;
+      userFormData.email = form.email.value;
+      userFormData.password = form.password.value;
+    }
+
+    return userFormData;
+  };
+
+  const sumbitFormData = () => {
+    userFormData = getFormData();
+
+    var url = "/process_order/";
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrftoken,
+      },
+      body: JSON.stringify({
+        form: userFormData,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.errors) {
+          console.log(JSON.stringify(data));
+          //set errors in form
+          let errList = document.createElement("ul");
+
+          for (let e of data.errors) {
+            let node = document.createElement("li");
+            node.style.color = "#FF0000";
+            let textNode = document.createTextNode(e);
+            node.appendChild(textNode);
+            errList.appendChild(node);
+          }
+          document.getElementById("errors").appendChild(errList);
+          document.getElementById("errors").classList.remove("hidden");
+          document.getElementById("payment-info").classList.add("hidden");
+        } else {
+          window.location.href = "{% url 'restaurant'%}";
+          window.alert("Registration Successful")
+        }
+      });
+  };
+</script>
+
+
+<style>
+  :root {
+    --input-padding-x: 1.5rem;
+    --input-padding-y: 0.75rem;
+  }
+
+  .login,
+  .image {
+    min-height: 80vh;
+    max-height: 80vh;
+  }
+
+  .bg-image {
+    /* todo: replace background-image with Ecom logo */
+    background-image: url("data:image/png;base64,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");
+    background-size: cover;
+    background-position: center;
+  }
+
+  .login-heading {
+    font-weight: 300;
+  }
+
+  .btn-login {
+    font-size: 0.9rem;
+    letter-spacing: 0.05rem;
+    padding: 0.75rem 1rem;
+    border-radius: 2rem;
+  }
+
+  .form-label-group {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+
+  .form-label-group > input,
+  .form-label-group > label {
+    padding: var(--input-padding-y) var(--input-padding-x);
+    height: auto;
+    border-radius: 2rem;
+  }
+
+  .form-label-group > label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    margin-bottom: 0;
+    /* Override default `<label>` margin */
+    line-height: 1.5;
+    color: #495057;
+    cursor: text;
+    /* Match the input under the label */
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    transition: all 0.1s ease-in-out;
+  }
+
+  .form-label-group input::-webkit-input-placeholder {
+    color: transparent;
+  }
+
+  .form-label-group input:-ms-input-placeholder {
+    color: transparent;
+  }
+
+  .form-label-group input::-ms-input-placeholder {
+    color: transparent;
+  }
+
+  .form-label-group input::-moz-placeholder {
+    color: transparent;
+  }
+
+  .form-label-group input::placeholder {
+    color: transparent;
+  }
+
+  .form-label-group input:not(:placeholder-shown) {
+    padding-top: calc(
+      var(--input-padding-y) + var(--input-padding-y) * (2 / 3)
+    );
+    padding-bottom: calc(var(--input-padding-y) / 3);
+  }
+
+  .form-label-group input:not(:placeholder-shown) ~ label {
+    padding-top: calc(var(--input-padding-y) / 3);
+    padding-bottom: calc(var(--input-padding-y) / 3);
+    font-size: 12px;
+    color: #777;
+  }
+</style>
+
+{% endblock content %}
